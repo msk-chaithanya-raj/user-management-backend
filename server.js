@@ -1,21 +1,22 @@
+require("dotenv").config(); // Import and configure dotenv
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000; // Use env variable or fallback to 5000
 
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(
-  "mongodb+srv://chaithubrazil:chaithu2005@universal.nt8uv.mongodb.net/?retryWrites=true&w=majority&appName=universal",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+// MongoDB connection using the DB_URI environment variable
+mongoose.connect(process.env.DB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
@@ -37,9 +38,14 @@ app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (user && (await bcrypt.compare(password, user.password))) {
-    const token = jwt.sign({ id: user._id, role: user.role }, "secret", {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        // Use env variable for JWT secret
+        expiresIn: "1h",
+      }
+    );
     res.send({ token, role: user.role });
   } else {
     res.status(400).send("Invalid credentials");
