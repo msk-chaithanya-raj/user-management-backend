@@ -24,10 +24,7 @@ app.use(
 app.use(express.json());
 
 // MongoDB connection using the DB_URI environment variable
-mongoose.connect(process.env.DB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(process.env.DB_URI);
 
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
